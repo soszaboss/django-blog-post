@@ -1,0 +1,38 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html{
+    font-size: 62.5%;
+}
+
+.grid-template{
+    display: grid;
+    grid-template-columns: 10em auto 30em;
+}
+
+.suggestion-side{
+    background-color: red;
+}
+
+.grid-template div:last-child{
+}
+
+.ul-list{
+text-align: center;
+}
+.list-item{
+    display: block;
+}
+
+nav{
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.grid-template-2-rows{
+    
+}
