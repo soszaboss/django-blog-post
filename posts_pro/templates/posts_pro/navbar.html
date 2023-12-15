@@ -1,0 +1,65 @@
+{% load crispy_forms_tags %}
+<nav class="navbar navbar-expand-lg bg-body-tertiary d-flex flex-column justify-content-evenly vh-100">
+    <div>
+            {% load static %}
+       <a href="#">
+           <img class="logo rounded-circle" src="{% static 'logo.png' %}" alt="Pushin P">
+       </a>
+    </div>
+    
+    <div class="collapse navbar-collapse" id="navbarNavDropdown h-100">
+
+        <ul class="navbar-nav ul-list h-100 d-flex flex-column justify-content-center gap-5">
+            <li class="nav-item list-item">
+                <a class="nav-link active" aria-current="page" href="#">Home</a>
+            </li>
+            <li class="nav-item list-item">
+                <a class="nav-link" href="#">Features</a>
+            </li>
+
+            <li class="nav-item list-item">
+                <a class="nav-link active" aria-current="page" href="#">Home</a>
+            </li>
+            <li class="nav-item list-item">
+                <a class="nav-link" href="#">Notification</a>
+            </li>
+            <li class="nav-item list-item">
+                <a class="nav-link btn" data-bs-toggle="modal" data-bs-target="#exampleModal">Add Post</a>
+            </li>
+        </ul>
+    </div>
+       <div class="nav-item dropup-center dropup list-item">
+            <a class="nav-link dropdown-toggle dropdown-toggle-split" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+               <img class="logo rounded-circle img-fluid" src="{% static 'avatar.png' %}" >
+            </a>
+            <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="#">Action</a></li>
+                <li><a class="dropdown-item" href="#">Another action</a></li>
+                <li><a class="dropdown-item" href="#">Something else here</a></li>
+            </ul>
+        </div>
+</nav>
+
+
+
+<!-- Modal -->
+<div class="modal fade mt-5" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+          <form action="" id="post-form">
+              {% csrf_token %}
+              {{ form|crispy }}
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="closed">Close</button>
+                  <button type="submit" class="btn btn-primary">Save changes</button>
+              </div>
+          </form>
+      </div>
+    </div>
+  </div>
+</div>

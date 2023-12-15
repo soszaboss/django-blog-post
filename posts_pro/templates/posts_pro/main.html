@@ -1,6 +1,26 @@
 {% extends 'base.html' %}
 {% load static %}
+
             {% block title %} Home {% endblock title %}
+
+    {% block nav-bar %}
+        {% include "posts_pro/navbar.html" %}
+    {% endblock nav-bar %}
+
+     {% block search-bar %}
+            <div class="row height">
+                <form class="form d-flex flex-column justify-content-center">
+                    <i class="bi bi-search"></i>
+                    <input type="text" class="form-control form-input" placeholder="Search anything...">
+                </form>
+            </div>
+
+         <div class="suggestion">
+
+         </div>
+
+    {% endblock search-bar %}
+
 
     {% block content %}
             <div id="alert-block" class="d-none">
@@ -36,7 +56,7 @@
     {% block scripts %}
         <script type="module" src="{% static 'posts_pro/function.js' %}" defer></script>
         <script type="module" src="{% static 'posts_pro/main.js' %}" defer></script>
-    <link rel="stylesheet" href="{% static 'posts_pro\style.css' %}">
+    <link rel="stylesheet" href="{% static 'posts_pro/css/style.css' %}">
 
     {% endblock scripts %}
 

@@ -16,20 +16,22 @@
     <link rel="stylesheet" href="{% static 'style.css' %}">
     <title>{% block title %}{% endblock title %}</title></head>
 <body>
-<main class="container-fluid h-100">
-    <section id="home-page" class="h-100">
-{#                <div class="nav-bar-side">#}
-{#                    {% include 'navbar.html' %}#}
-{#                </div>#}
+<main class="container h-100">
+    <section id="home-page" class="h-100 grid grid-template-3-cols">
+                <div class="nav-bar-side">
+                    {% block nav-bar %}
+                    {% endblock nav-bar %}
+                </div>
 
                 <div class="posts-side h-100">
                     {% block content %}
                     {% endblock content %}
                 </div>
 
-{#                <div class="suggestion-side ms-5">#}
-{#                    Lorem ipsum dolor sit amet, consectetur adipisicing elit. Aspernatur ducimus magni necessitatibus nulla officia quas repudiandae sed vitae? Assumenda at, aut fugit itaque labore laudantium obcaecati perferendis porro tenetur velit?#}
-{#                </div>#}
+                <div class="search-bar-suggestion-side grid grid-template-2-rows">
+                    {% block search-bar %}
+                    {% endblock search-bar %}
+                </div>
 
     </section>
     <section id="post-page-detail-content" class="d-none">

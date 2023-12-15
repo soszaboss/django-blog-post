@@ -8,18 +8,6 @@ html{
     font-size: 62.5%;
 }
 
-.grid-template{
-    display: grid;
-    grid-template-columns: 10em auto 30em;
-}
-
-.suggestion-side{
-    background-color: red;
-}
-
-.grid-template div:last-child{
-}
-
 .ul-list{
 text-align: center;
 }
@@ -27,12 +15,14 @@ text-align: center;
     display: block;
 }
 
-nav{
-    display: flex;
-    flex-direction: column;
-    height: 100%;
+
+
+
+.grid {
+    display: grid;
 }
 
-.grid-template-2-rows{
-    
+.grid-template-3-cols{
+        grid-template-columns: 25% 50% 25%;
+    column-gap: 3em;
 }

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     # 3 party apps
     'crispy_forms',
     'crispy_bootstrap5',
+    'django_sass'
 ]
 
 MIDDLEWARE = [
