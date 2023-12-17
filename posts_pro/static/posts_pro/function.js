@@ -1,5 +1,51 @@
 "use strict";
 
+const slide = (id, direction='next') => {
+    const myCarouselElement = document.getElementById(`myCarousel-${id}`)
+    const carousel = new bootstrap.Carousel(myCarouselElement);
+    return direction === 'next' ? carousel.next() :  carousel.prev(); // Slides to the next item on button click
+
+}
+function createCarousel(imageSources, id) {
+    if (imageSources.length === 0) {
+        return;
+    }
+
+    let carouselIndicators = '';
+    let carouselItems = '';
+
+    for (let i = 0; i < imageSources.length; i++) {
+        imageSources.length > 1 ? carouselIndicators += `<button style="height: 8px; width: 8px" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="${i}"  class="${i === 0 ? 'active' :''} rounded-circle" ${i === 0 ? ' aria-current="true"' : ''} aria-label="Slide ${i+1}"></button>` : '';
+
+        carouselItems += `<div class="carousel-item ${i === 0 ? 'active' : ''}">
+            <img src="${imageSources[i]}" class="d-block w-100 card-img-bottom rounded-1" alt="Slide ${i+1}">
+        </div>`;
+    }
+
+    let controls = '';
+    if (imageSources.length > 1) {
+        controls = `<button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev" id="carousel-control-prev-${id}">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next" id="carousel-control-next-${id}">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>`;
+    }
+
+    return `<div id="myCarousel-${id}" class="carousel slide">
+        <div class="carousel-indicators">
+            ${carouselIndicators}
+        </div>
+        <div class="carousel-inner">
+            ${carouselItems}
+        </div>
+        ${controls}
+    </div>`;
+}
+
+
 const fillModalUpdate = (id, home_page_post=true) =>{
     if (home_page_post) {
         const modalTitle = document.getElementById(`modal-update-title-input-${id}`);
@@ -400,7 +446,7 @@ const switchPage = (bool = true, title_page= 'Home') => {
 
 
 // function that display each post related to an user
- function cardElement(title, content, author, count_up, count_down, count_comment, post_id) {
+ function cardElement(title, content, author, count_up, count_down, count_comment, post_id, array_photo) {
      return  `
         <div class="col-12 col-md-5 col-sm-12 col-xs-12 w-100 h-100 row post-card" id="post-card-${post_id}" data-post-id="${post_id}">
                 <div class="card p-3 p-md-4 position-relative">
@@ -431,6 +477,8 @@ const switchPage = (bool = true, title_page= 'Home') => {
                         </div>
                         <div class="card-body">
                                <p class="card-text"><span class="card-text-content" id="card-element-descrition-${post_id}">${content}</span></p>
+                               ${createCarousel(array_photo, post_id)}
+<!--                                 <img src="..." class="card-img-bottom " alt="...">-->
                         </div>
                         <div class="card-footer">
                             <form class="like-unlike-forms" data-form-id="${post_id}" method="post" >
@@ -644,17 +692,26 @@ export const getData = (numOfPost) => {
     })
     .then(response => response.json())
     .then(response => {
-        // console.log(response);
+        console.log(response);
         document.title = "Home";
         window.history.pushState(null, ``, `${window.location.href}`);
         const posts = response.post;
         setTimeout(() => {
             spinner.classList.add('d-none');
             posts.forEach(element => {
-                postEl.innerHTML += cardElement(element.title, element.description, element.author, element.liked_count, element.unliked_count, element.comments_count, element.id);
+                postEl.innerHTML += cardElement(element.title, element.description, element.author, element.liked_count, element.unliked_count, element.comments_count, element.id, element.photos);
                 likedUnlikedNull(element.liked, element.unliked, element.id);
-            })
+                if(element.photos.length > 1){
+                        document.getElementById(`carousel-control-prev-${element.id}`).addEventListener('click', ()=>{
 
+                        slide(element.id, 'prev')
+                    })
+                    document.getElementById(`carousel-control-next-${element.id}`).addEventListener('click', ()=>{
+
+                        slide(element.id, 'next')
+            })
+                }
+                    })
             endBox.classList.remove("d-none");
         }, 25);
         if (response.size === 0) {
@@ -1040,7 +1097,7 @@ export const card = (arr) => {
             arr.push(card);
             const id = card.getAttribute('data-post-id');
             card.addEventListener('click', function (event) {
-                const elementsTargeted = event.target.matches('.card-text-content, .card-title-content, .author, svg, .btn-comment, .btn-delete,.btn-update, .btn-text-post-three-dot, .bi, .dropdown-item, .modal-dialog');
+                const elementsTargeted = event.target.matches('.card-text-content, .card-title-content, .author, svg, .btn-comment, .btn-delete,.btn-update, .btn-text-post-three-dot, .bi, .dropdown-item, .modal-dialog, img, .carousel-control-prev, .carousel-control-next, .visually-hidden, .carousel-control-next-icon, .carousel-control-prev-icon');
                 const buttonElementsTargeted = Array.from(buttons).some(button => event.target === button);
                 const imgElementsTargeted = Array.from(imgs).some(img => event.target === img);
                 const aElementsTargeted = Array.from(links).some(link => event.target === link);

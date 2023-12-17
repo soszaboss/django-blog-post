@@ -1,6 +1,6 @@
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404
-from .models import Post, Comment, Like
+from .models import Post, Comment, Like, Photo
 from django.http import JsonResponse, HttpResponse
 from django.db.models import Count, Q
 from django.contrib.auth.models import User
@@ -38,24 +38,24 @@ def index(request):
 
 
 
+from django.db.models import Count, Prefetch
+
 def load_data(request, number):
     # Get the ContentType for the Post model
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-
-        global post_content_type
-        global comment_content_type
-        post_content_type = ContentType.objects.get_for_model(Post)
-        comment_content_type = ContentType.objects.get_for_model(Comment)
 
         post_visible = 3
         upper = number
         lower = upper - post_visible
         size = Post.objects.all().count()
 
-        posts = Post.objects.annotate(
+        posts = Post.objects.prefetch_related(
+            Prefetch('photo_set', queryset=Photo.objects.all())
+        ).annotate(
             like_counts=Count('likes', filter=Q(likes__value=True)),
             unlike_counts=Count('likes', filter=Q(likes__value=False)),
-            comment_counts=Count('comments')
+            comment_counts=Count('comments'),
+            photo_counts=Count('photos')
         ).order_by('-created_at')[lower:upper]
 
         post_list = []
@@ -65,16 +65,25 @@ def load_data(request, number):
                 'title': post_item.title,
                 'description': post_item.description,
                 'author': post_item.author.user.username,
-                "liked": Like.objects.filter(content_type=ContentType.objects.get_for_model(Post), object_id=int(post_item.id), value=True, user=request.user).exists(),# Now you can filter Like objects based on the content_type and object_id
+                "liked": Like.objects.filter(content_type=ContentType.objects.get_for_model(Post), object_id=int(post_item.id), value=True, user=request.user).exists(),
                 "unliked": Like.objects.filter(content_type=ContentType.objects.get_for_model(Post), object_id=int(post_item.id), value=False, user=request.user).exists(),
                 "liked_count": post_item.like_counts,
                 "unliked_count": post_item.unlike_counts,
-                "comments_count": post_item.comment_counts
+                "comments_count": post_item.comment_counts,
+                "photo_count": post_item.photo_counts
             }
+            # Get the photos related to the current post
+            photos = post_item.photo_set.all()
+            photo_urls = [photo.image.url for photo in photos]
+
+            # Add the photo URLs and the author's profile picture to the post data
+            post_items['photos'] = photo_urls
+            post_items['author_avatar'] = post_item.author.user.profile.avatar.url
 
             post_list.append(post_items)
 
         return JsonResponse({'post': post_list, 'size': size, 'user': request.user.username})
+
 
 
 def like_post(request, id):

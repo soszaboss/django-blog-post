@@ -8,7 +8,7 @@
     {% endblock nav-bar %}
 
      {% block search-bar %}
-            <div class="row height">
+            <div class="row height position-fixed search-bar" style="width: 20%; top: 1%; right:5%; ">
                 <form class="form d-flex flex-column justify-content-center">
                     <i class="bi bi-search"></i>
                     <input type="text" class="form-control form-input" placeholder="Search anything...">
@@ -32,7 +32,7 @@
                 </div>
             </div>
             <div class="h-100">
-                <div class="row d-flex flex-column align-items-center row-gap-2" id="post-el">
+                <div class="row d-flex flex-column align-items-center gap-4" id="post-el">
                 </div>
                 <div class="text-center mt-3 d-none" id="end-box">
                     <button type="button" class="btn" id="load-btn">

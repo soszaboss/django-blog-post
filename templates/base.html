@@ -16,9 +16,9 @@
     <link rel="stylesheet" href="{% static 'style.css' %}">
     <title>{% block title %}{% endblock title %}</title></head>
 <body>
-<main class="container h-100">
+<main class="container-fluid h-100">
     <section id="home-page" class="h-100 grid grid-template-3-cols">
-                <div class="nav-bar-side">
+                <div class="nav-bar-side w-100 position-relative d-flex justify-content-end">
                     {% block nav-bar %}
                     {% endblock nav-bar %}
                 </div>
@@ -28,7 +28,7 @@
                     {% endblock content %}
                 </div>
 
-                <div class="search-bar-suggestion-side grid grid-template-2-rows">
+                <div class="search-bar-suggestion-side grid grid-template-2-rows position-relative">
                     {% block search-bar %}
                     {% endblock search-bar %}
                 </div>
