@@ -13,4 +13,5 @@ urlpatterns = [
     path('get-card-data/<int:id>/', views.get_card_data, name='get-card-data'),
     path('update-post/<int:id>/', views.update, name='update'),
     path('delete-post/<int:id>/', views.delete, name='delete'),
+    path('upload/', views.upload, name='upload'),
 ]

@@ -26,3 +26,7 @@ text-align: center;
         grid-template-columns: 25% 50% 25%;
     /*column-gap: 3em;*/
 }
+
+#dropzone-container{
+    display: none;
+}

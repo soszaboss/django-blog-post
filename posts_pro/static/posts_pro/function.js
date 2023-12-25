@@ -1,11 +1,22 @@
 "use strict";
 
-const slide = (id, direction='next') => {
+const slide = (id) => {
     const myCarouselElement = document.getElementById(`myCarousel-${id}`)
     const carousel = new bootstrap.Carousel(myCarouselElement);
-    return direction === 'next' ? carousel.next() :  carousel.prev(); // Slides to the next item on button click
-
+    const btnPrev = document.getElementById(`carousel-control-prev-${id}`);
+    const btnNext = document.getElementById(`carousel-control-next-${id}`);
+    console.log(btnPrev);
+    console.log(btnNext);
+    btnPrev.addEventListener('click', ()=>{
+        console.log('clicked');
+        carousel.prev();
+    });
+    btnNext.addEventListener('click', ()=>{
+        console.log('clicked')
+        carousel.next();
+    });
 }
+
 function createCarousel(imageSources, id) {
     if (imageSources.length === 0) {
         return;
@@ -16,7 +27,6 @@ function createCarousel(imageSources, id) {
 
     for (let i = 0; i < imageSources.length; i++) {
         imageSources.length > 1 ? carouselIndicators += `<button style="height: 8px; width: 8px" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="${i}"  class="${i === 0 ? 'active' :''} rounded-circle" ${i === 0 ? ' aria-current="true"' : ''} aria-label="Slide ${i+1}"></button>` : '';
-
         carouselItems += `<div class="carousel-item ${i === 0 ? 'active' : ''}">
             <img src="${imageSources[i]}" class="d-block w-100 card-img-bottom rounded-1" alt="Slide ${i+1}">
         </div>`;
@@ -357,6 +367,7 @@ const likedUnlikedNull = (liked = false, unliked = false, id) => {
 export const likeUnlikePosts = (arr) => {
 return setTimeout(() => {
     const displayNone = "d-none";
+    console.log(Array.from(new Set(document.getElementsByClassName('like-unlike-forms'))))
     const forms = Array.from(new Set(document.getElementsByClassName('like-unlike-forms'))).filter((element)=> !(arr.includes(element)));
     // console.log(forms);
     forms.forEach(form => {
@@ -374,7 +385,7 @@ return setTimeout(() => {
         btnLikeClicked.addEventListener('click', (e) => {
             if (!(biHandThumbsUp.classList.contains(displayNone))) {
                 // Handle "Like" button click
-                fetchData(`/posts-pro/like-post/${postId}/`)
+                fetchData(`/posts-pro/like-post/${postId}/`, true, 'POST')
                     .then(response => response.json())
                     .then(data => {
                         count(data["like_counts"], data["unlike_counts"], data.id);
@@ -386,7 +397,7 @@ return setTimeout(() => {
                     });
             } else {
                 // Handle "Unlike" button click
-                fetchData(`/posts-pro/null-post/${postId}/`)
+                fetchData(`/posts-pro/null-post/${postId}/`, true, 'POST')
                     .then(response => response.json())
                     .then(data => {
                         count(data["like_counts"], data["unlike_counts"], data.id);
@@ -401,7 +412,7 @@ return setTimeout(() => {
         btnUnlikeClicked.addEventListener('click', (e) => {
             if (biHandThumbsDownFill.classList.contains(displayNone)) {
                 // Handle "Unlike" button click
-                fetchData(`/posts-pro/unlike-post/${postId}/`)
+                fetchData(`/posts-pro/unlike-post/${postId}/`, true, 'POST')
                     .then(response => response.json())
                     .then(data => {
                         count(data["like_counts"], data["unlike_counts"], data.id);
@@ -412,7 +423,7 @@ return setTimeout(() => {
                     });
             } else {
                 // Handle "Like" button click
-                fetchData(`/posts-pro/null-post/${postId}/`)
+                fetchData(`/posts-pro/null-post/${postId}/`, true, 'POST')
                     .then(response => response.json())
                     .then(data => {
                         count(data["like_counts"], data["unlike_counts"], data.id);
@@ -611,70 +622,67 @@ const switchPage = (bool = true, title_page= 'Home') => {
 
 // function that handles to post a post from the modal add new post
 
-export const postFromModal = () => {
-     const postEl = document.querySelector('#post-el');
-const postForm = document.getElementById('post-form');
-const title = document.getElementById('id_title');
-const description = document.getElementById('id_description');
-const closed = document.getElementById('closed');
-const csrf = document.getElementsByName("csrfmiddlewaretoken");
-// console.log(csrf)
-postForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    $.ajax({
-        url: '/posts-pro/',  // Update this URL based on your Django project's URL structure
-        type: 'POST',
-        headers: {'X-Requested-With': 'XMLHttpRequest'},
-        data: {
-            'csrfmiddlewaretoken': csrf[0].value,
-            'title': title.value,
-            'description': description.value
+export const postFromModal = (arr) => {
+    const postEl = document.querySelector('#post-el');
+    const postForm = document.getElementById('post-form');
+    const title = document.getElementById('id_title');
+    const description = document.getElementById('id_description');
+    const closed = document.getElementById('closed');
+    const csrf = document.getElementsByName("csrfmiddlewaretoken");
+
+    // Initialize Dropzone on the correct element
+    let imageUrl = [];
+    const dropzoneEl = document.getElementById("dropzone-container")
+    console.log(dropzoneEl)
+    let dropzone = new Dropzone(dropzoneEl, {
+        url: "/posts-pro/upload/",
+        headers: {
+            "X-CSRFToken": csrf[0].value
         },
-        success: function (response) {
-            // console.log('Success:', response);
-            postEl.insertAdjacentHTML('afterbegin', cardElement(response.title, response.description, response.author, 0, 0, 0, response.id));
-            likeUnlikePosts();
-            closed.click();
-            e.target.reset();
-            alert(true);
-            // Add any additional logic for handling the successful response
-        },
-        error: function (error) {
-            // Add any additional logic for handling errors
-            alert(false, error);
-            console.log('Error:', error);
+        paramName: "file",
+        maxFilesize: 5,
+        acceptedFiles: "image/*",
+        addRemoveLinks: true,
+        init: function () {
+            this.on("success", function (file, response) {
+                imageUrl.push(response.id);
+            });
         }
     });
-});
 
-/*postForm.addEventListener('submit', (e) => {
-    e.preventDefault();
+    postForm.addEventListener('submit', (e) => {
+        e.preventDefault();
 
-    fetch('/posts-pro/', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'X-Requested-With': 'XMLHttpRequest',
-            'X-CSRFToken': csrf[0].value,
-        },
-        body: new URLSearchParams({
-            'title': title.value,
-            'description': description.value,
-        }),
-    })
-    .then(response => response.json())
-    .then(response => {
-        console.log('Success:', response);
-        postEl.insertAdjacentHTML('afterbegin', cardElement(response.title, response.description, response.author, 0, 0, 0, response.id));
-        closed.click();
-        // Add any additional logic for handling the successful response
-    })
-    .catch(error => {
-        console.log('Error:', error);
-        // Add any additional logic for handling errors
+        // Get the post data
+        let formData = new FormData(postForm);
+        formData.append("csrfmiddlewaretoken", csrf[0].value);
+        formData.append("images", JSON.stringify(imageUrl));
+        formData.append("title", title.value);
+        formData.append("description", description.value);
+
+        $.ajax({
+            url: '/posts-pro/',
+            type: 'POST',
+            headers: {'X-Requested-With': 'XMLHttpRequest'},
+            data: formData,
+            processData: false, // Important for sending FormData
+            contentType: false, // Important for sending FormData
+            success: function (response) {
+                postEl.insertAdjacentHTML('afterbegin', cardElement(response.title, response.description, response.author, 0, 0, 0, response.id, imageUrl));
+                likeUnlikePosts(arr);
+                closed.click();
+                postForm.reset();
+                imageUrl = [];
+                alert(true);
+            },
+            error: function (error) {
+                alert(false, error);
+                console.log('Error:', error);
+            }
+        });
     });
-});*/
-}
+};
+
 
 
 
@@ -685,7 +693,7 @@ export const getData = (numOfPost) => {
     const endBox = document.querySelector('#end-box');
     const spinner = document.querySelector('#spinner');
     const loadBtn = document.querySelector('#load-btn');
-
+    let carousel = [];
     fetch(`/posts-pro/posts/${numOfPost}/`, {
             headers: {'X-Requested-With': 'XMLHttpRequest'},
 
@@ -701,18 +709,13 @@ export const getData = (numOfPost) => {
             posts.forEach(element => {
                 postEl.innerHTML += cardElement(element.title, element.description, element.author, element.liked_count, element.unliked_count, element.comments_count, element.id, element.photos);
                 likedUnlikedNull(element.liked, element.unliked, element.id);
+                console.log(element.photos)
                 if(element.photos.length > 1){
-                        document.getElementById(`carousel-control-prev-${element.id}`).addEventListener('click', ()=>{
-
-                        slide(element.id, 'prev')
-                    })
-                    document.getElementById(`carousel-control-next-${element.id}`).addEventListener('click', ()=>{
-
-                        slide(element.id, 'next')
-            })
+                    carousel.push(element.id);
                 }
                     })
             endBox.classList.remove("d-none");
+            carousel.forEach(element => slide(element));
         }, 25);
         if (response.size === 0) {
             endBox.textContent = 'No Post(s) Added Yet...';

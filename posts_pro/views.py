@@ -1,13 +1,15 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.shortcuts import render, get_object_or_404
 from .models import Post, Comment, Like, Photo
 from django.http import JsonResponse, HttpResponse
 from django.db.models import Count, Q
-from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.contenttypes.models import ContentType
 from .forms import CreatePost
 from profiles.models import Profile
 from django.http import QueryDict
+import json
 
 
 
@@ -23,6 +25,16 @@ def index(request):
         post.updated_at = timezone.now()
         post.save()
         # author_data = serialize('json', [author_profile])
+
+        try:
+            image_ids = json.loads(request.POST.get('file'))
+            images = Photo.objects.filter(id__in=image_ids)
+            for image in images:
+                image.post = post
+                image.save()
+        except (TypeError, ValueError, ObjectDoesNotExist):
+            # Handle the exception if no photos are uploaded
+            pass
 
         return JsonResponse({
             'title': post.title,
@@ -231,3 +243,12 @@ def update(request, id):
         current_record.save()
         return JsonResponse({"title":title,"description":description, "id":id})
 #In this code, QueryDict(request.body) creates a new QueryDict (similar to a dictionary) that contains your PUT parameters. You can then use put.get('title') and put.get('description') to access the parameters.
+
+def upload(request):
+    if request.method == 'POST':
+        file = request.FILES.get('file')
+        photo = Photo.objects.create(image=file)
+        photo.save()
+        return JsonResponse({'status': 'success', 'id': photo.image.url})
+    else:
+        return JsonResponse({'status': 'fail'})
