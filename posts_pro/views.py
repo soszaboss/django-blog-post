@@ -62,12 +62,11 @@ def load_data(request, number):
         size = Post.objects.all().count()
 
         posts = Post.objects.prefetch_related(
-            Prefetch('photo_set', queryset=Photo.objects.all())
+            Prefetch('photos', queryset=Photo.objects.all())
         ).annotate(
             like_counts=Count('likes', filter=Q(likes__value=True)),
             unlike_counts=Count('likes', filter=Q(likes__value=False)),
             comment_counts=Count('comments'),
-            photo_counts=Count('photos')
         ).order_by('-created_at')[lower:upper]
 
         post_list = []
@@ -82,10 +81,9 @@ def load_data(request, number):
                 "liked_count": post_item.like_counts,
                 "unliked_count": post_item.unlike_counts,
                 "comments_count": post_item.comment_counts,
-                "photo_count": post_item.photo_counts
             }
             # Get the photos related to the current post
-            photos = post_item.photo_set.all()
+            photos = post_item.photos.all()
             photo_urls = [photo.image.url for photo in photos]
 
             # Add the photo URLs and the author's profile picture to the post data
@@ -244,11 +242,19 @@ def update(request, id):
         return JsonResponse({"title":title,"description":description, "id":id})
 #In this code, QueryDict(request.body) creates a new QueryDict (similar to a dictionary) that contains your PUT parameters. You can then use put.get('title') and put.get('description') to access the parameters.
 
-def upload(request):
+def upload(request, id):
     if request.method == 'POST':
         file = request.FILES.get('file')
-        photo = Photo.objects.create(image=file)
-        photo.save()
-        return JsonResponse({'status': 'success', 'id': photo.image.url})
+        post = Post.objects.get(id=id)
+        post.photos.image = file
+        post.save()
+        return JsonResponse({'status': 'success'})
     else:
-        return JsonResponse({'status': 'fail'})
+        return JsonResponse({'status': 'failed'})
+
+def img_url(request, id):
+    if request.method == 'GET':
+        post = get_object_or_404(Post.objects, id=id)
+        photo_urls = [photo.image.url for photo in post.photos]
+        print(photo_urls)
+        return JsonResponse({"img_url":photo_urls})

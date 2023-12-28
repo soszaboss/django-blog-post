@@ -27,6 +27,15 @@ text-align: center;
     /*column-gap: 3em;*/
 }
 
-#dropzone-container{
+.dropzone{
+    min-height: 0;
+    padding: 0;
+}
+.dz-message{
     display: none;
+}
+
+.dropzone-img{
+    max-width: 200px;
+    max-height: 200px;
 }

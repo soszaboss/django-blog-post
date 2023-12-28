@@ -11,7 +11,8 @@ def path_and_rename_post(instance, filename):
     upload_to = 'posts'
     ext = filename.split('.')[-1]
     # get filename
-    if instance.post.id:
+    if instance.post.id is not None:
+        # set filename as post_id
         filename = '{}.{}'.format(instance.post.id, ext)
     else:
         # set filename as random string
@@ -32,8 +33,6 @@ class Post(models.Model):
     updated_at = models.DateTimeField(default=timezone.now)
     created_at = models.DateTimeField(default=timezone.now)
     likes = GenericRelation(Like)
-    photos = models.ImageField(upload_to=path_and_rename_post, blank=True, null=True)
-
     def save(self, *args, **kwargs):
         self.updated_at = timezone.now()
         super().save(*args, **kwargs)
@@ -55,6 +54,6 @@ class Comment(models.Model):
         return f"{self.user}: {self.text}"
 class Photo(models.Model):
     image = models.ImageField(upload_to=path_and_rename_post)
-    post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, blank=True, null=True, related_name="photos")
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)

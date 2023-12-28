@@ -30,20 +30,7 @@ postFromModal(array);
 window.addEventListener("load", function () {
 card(cardElment);
 modelHandler(models,true);
-    // const dropzoneEl = document.getElementById("dropzone-container")
-    // console.log(dropzoneEl)
-    // let dropzone = new Dropzone(dropzoneEl, {
-    //     url: "/posts-pro/upload/",
-    //     paramName: "file",
-    //     maxFilesize: 5,
-    //     acceptedFiles: "image/*",
-    //     addRemoveLinks: true,
-    //     init: function () {
-    //         this.on("success", function (file, response) {
-    //             imageUrl.push(response.id);
-    //         });
-    //     }
-    // });
+
 })
 
 

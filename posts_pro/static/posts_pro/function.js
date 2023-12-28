@@ -629,34 +629,45 @@ export const postFromModal = (arr) => {
     const description = document.getElementById('id_description');
     const closed = document.getElementById('closed');
     const csrf = document.getElementsByName("csrfmiddlewaretoken");
+    const dropzoneEl = document.getElementById("dropzone-container");
+    let imgUrl;
+        var myDropzone = new Dropzone("#dropzone-container", {
+    url: "/posts-pro/upload/",
+            type: "POST", // This will be replaced with the correct URL in the AJAX success callback
+    headers: {
+        "X-CSRFToken": csrftoken
+    },
+    paramName: "file",
+    maxFilesize: 5,
+    acceptedFiles: "image/*",
+    autoProcessQueue: false,
+    addRemoveLinks: true,
+});
 
-    // Initialize Dropzone on the correct element
-    let imageUrl = [];
-    const dropzoneEl = document.getElementById("dropzone-container")
-    console.log(dropzoneEl)
-    let dropzone = new Dropzone(dropzoneEl, {
-        url: "/posts-pro/upload/",
-        headers: {
-            "X-CSRFToken": csrf[0].value
-        },
-        paramName: "file",
-        maxFilesize: 5,
-        acceptedFiles: "image/*",
-        addRemoveLinks: true,
-        init: function () {
-            this.on("success", function (file, response) {
-                imageUrl.push(response.id);
-            });
-        }
-    });
+myDropzone.on("addedfile", function(file) {
+    var reader = new FileReader();
+
+    reader.onloadend = function() {
+        var img = document.createElement('img');
+        img.src = reader.result;
+        img.className = "dropzone-img";
+        document.getElementById("preview").appendChild(img);
+    }
+
+    reader.onerror = function() {
+        console.error("There was an error reading the file!");
+    }
+
+    if (file) {
+        reader.readAsDataURL(file);
+    }
+});
 
     postForm.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        // Get the post data
         let formData = new FormData(postForm);
         formData.append("csrfmiddlewaretoken", csrf[0].value);
-        formData.append("images", JSON.stringify(imageUrl));
         formData.append("title", title.value);
         formData.append("description", description.value);
 
@@ -665,15 +676,26 @@ export const postFromModal = (arr) => {
             type: 'POST',
             headers: {'X-Requested-With': 'XMLHttpRequest'},
             data: formData,
-            processData: false, // Important for sending FormData
-            contentType: false, // Important for sending FormData
+            processData: false,
+            contentType: false,
             success: function (response) {
-                postEl.insertAdjacentHTML('afterbegin', cardElement(response.title, response.description, response.author, 0, 0, 0, response.id, imageUrl));
-                likeUnlikePosts(arr);
-                closed.click();
-                postForm.reset();
-                imageUrl = [];
-                alert(true);
+                let id_post = response.id;
+                myDropzone.options.url = `/posts-pro/upload/${id_post}/`;
+                myDropzone.processQueue();
+
+                // Add the queuecomplete event listener
+                myDropzone.on("queuecomplete", function() {
+                    fetchData(`/posts-pro/img_url/${id_post}/`, false, "GET").then(
+                        response => response.json()
+                    ).then(
+                        response => console.log(response)
+                    );
+                    postEl.insertAdjacentHTML('afterbegin', cardElement(response.title, response.description, response.author, 0, 0, 0, id_post, imgUrl));
+                    likeUnlikePosts(arr);
+                    closed.click();
+                    postForm.reset();
+                    alert(true);
+                });
             },
             error: function (error) {
                 alert(false, error);
@@ -681,7 +703,8 @@ export const postFromModal = (arr) => {
             }
         });
     });
-};
+}
+
 
 
 
